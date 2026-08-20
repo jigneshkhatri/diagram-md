@@ -41,6 +41,15 @@ export default function Workspace({ projectId }: WorkspaceProps) {
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const [isNarrow, setIsNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const update = () => setIsNarrow(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   const documentHandleRef = useRef<DocumentPaneHandle | null>(null);
   const diagramHandleRef = useRef<DiagramPaneHandle | null>(null);
   const docPanelRef = useRef<PanelImperativeHandle | null>(null);
@@ -167,7 +176,7 @@ export default function Workspace({ projectId }: WorkspaceProps) {
         }}
       />
       <div className="min-h-0 flex-1">
-        <Group orientation="horizontal">
+        <Group orientation={isNarrow ? "vertical" : "horizontal"}>
           <Panel id="sidebar" defaultSize={18} minSize={12} maxSize={30} collapsible collapsedSize={0}>
             <DocumentSidebar
               documents={manifest.documents}
@@ -178,7 +187,7 @@ export default function Workspace({ projectId }: WorkspaceProps) {
               onDelete={handleDeleteDocument}
             />
           </Panel>
-          <Separator className="w-1 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20" />
+          <Separator className={isNarrow ? "h-1 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20" : "w-1 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20"} />
           <Panel id="document" panelRef={docPanelRef} defaultSize={41} minSize={15} collapsible collapsedSize={0}>
             {currentContent && selectedDocId ? (
               <DocumentPane
@@ -193,7 +202,7 @@ export default function Workspace({ projectId }: WorkspaceProps) {
               <p className="p-6 text-sm text-black/40 dark:text-white/40">Select or create a document.</p>
             )}
           </Panel>
-          <Separator className="w-1 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20" />
+          <Separator className={isNarrow ? "h-1 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20" : "w-1 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20"} />
           <Panel id="diagram" panelRef={diagramPanelRef} defaultSize={41} minSize={15} collapsible collapsedSize={0}>
             {currentContent && selectedDocId ? (
               <DiagramPane
