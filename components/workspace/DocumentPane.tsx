@@ -31,6 +31,7 @@ import {
   InsertCodeBlock,
   InsertFrontmatter,
   ChangeCodeMirrorLanguage,
+  ConditionalContents,
   Separator,
   type MDXEditorMethods,
 } from "@mdxeditor/editor";
@@ -94,24 +95,33 @@ export default function DocumentPane({ initialMarkdown, onReady, onChange }: Doc
           toolbarPlugin({
             toolbarContents: () => (
               <DiffSourceToggleWrapper>
-                <UndoRedo />
-                <Separator />
-                <BoldItalicUnderlineToggles />
-                <StrikeThroughSupSubToggles />
-                <CodeToggle />
-                <Separator />
-                <BlockTypeSelect />
-                <Separator />
-                <ListsToggle />
-                <Separator />
-                <CreateLink />
-                <InsertImage />
-                <InsertTable />
-                <InsertThematicBreak />
-                <InsertCodeBlock />
-                <InsertFrontmatter />
-                <Separator />
-                <ChangeCodeMirrorLanguage />
+                <ConditionalContents
+                  options={[
+                    { when: (editor) => editor?.editorType === "codeblock", contents: () => <ChangeCodeMirrorLanguage /> },
+                    {
+                      fallback: () => (
+                        <>
+                          <UndoRedo />
+                          <Separator />
+                          <BoldItalicUnderlineToggles />
+                          <StrikeThroughSupSubToggles />
+                          <CodeToggle />
+                          <Separator />
+                          <BlockTypeSelect />
+                          <Separator />
+                          <ListsToggle />
+                          <Separator />
+                          <CreateLink />
+                          <InsertImage />
+                          <InsertTable />
+                          <InsertThematicBreak />
+                          <InsertCodeBlock />
+                          <InsertFrontmatter />
+                        </>
+                      ),
+                    },
+                  ]}
+                />
               </DiffSourceToggleWrapper>
             ),
           }),
