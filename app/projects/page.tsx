@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import ProjectCard from "@/components/projects/ProjectCard";
 import NewProjectDialog from "@/components/projects/NewProjectDialog";
@@ -14,6 +14,14 @@ function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
 }
 
+const NO_PROVIDERS: StorageProvider[] = [];
+function subscribeNoop() {
+  return () => {};
+}
+function getServerProviders() {
+  return NO_PROVIDERS;
+}
+
 export default function ProjectsPage() {
   const router = useRouter();
   const [entries, setEntries] = useState<ProjectRegistryEntry[]>([]);
@@ -21,8 +29,10 @@ export default function ProjectsPage() {
   const [showNewProject, setShowNewProject] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const providers = availableProviders();
+  // Provider availability depends on `window`, which differs between the SSR
+  // pass and the client — useSyncExternalStore is the correct primitive for
+  // a value like this (server snapshot vs. client snapshot, static after mount).
+  const providers = useSyncExternalStore(subscribeNoop, availableProviders, getServerProviders);
 
   useEffect(() => {
     listProjects().then((projects) => {
