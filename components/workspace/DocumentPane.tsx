@@ -8,6 +8,11 @@ import {
   quotePlugin,
   thematicBreakPlugin,
   markdownShortcutPlugin,
+  toolbarPlugin,
+  UndoRedo,
+  BoldItalicUnderlineToggles,
+  BlockTypeSelect,
+  ListsToggle,
   type MDXEditorMethods,
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
@@ -37,7 +42,23 @@ export default function DocumentPane({ initialMarkdown, onReady, onChange }: Doc
         markdown={initialMarkdown}
         onChange={() => onChange?.()}
         contentEditableClassName="prose max-w-none min-h-full px-4 py-3"
-        plugins={[headingsPlugin(), listsPlugin(), quotePlugin(), thematicBreakPlugin(), markdownShortcutPlugin()]}
+        plugins={[
+          headingsPlugin(),
+          listsPlugin(),
+          quotePlugin(),
+          thematicBreakPlugin(),
+          markdownShortcutPlugin(),
+          toolbarPlugin({
+            toolbarContents: () => (
+              <>
+                <UndoRedo />
+                <BoldItalicUnderlineToggles />
+                <BlockTypeSelect />
+                <ListsToggle />
+              </>
+            ),
+          }),
+        ]}
       />
     </div>
   );
