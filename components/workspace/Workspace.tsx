@@ -177,7 +177,7 @@ export default function Workspace({ projectId }: WorkspaceProps) {
       />
       <div className="min-h-0 flex-1">
         <Group orientation={isNarrow ? "vertical" : "horizontal"}>
-          <Panel id="sidebar" defaultSize={18} minSize={12} maxSize={30} collapsible collapsedSize={0}>
+          <Panel id="sidebar" defaultSize="18" minSize="12" maxSize="30" collapsible collapsedSize="0">
             <DocumentSidebar
               documents={manifest.documents}
               selectedId={selectedDocId}
@@ -188,7 +188,7 @@ export default function Workspace({ projectId }: WorkspaceProps) {
             />
           </Panel>
           <Separator className={isNarrow ? "h-1 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20" : "w-1 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20"} />
-          <Panel id="document" panelRef={docPanelRef} defaultSize={41} minSize={15} collapsible collapsedSize={0}>
+          <Panel id="document" panelRef={docPanelRef} defaultSize="41" minSize="15" collapsible collapsedSize="0">
             {currentContent && selectedDocId ? (
               <DocumentPane
                 key={selectedDocId}
@@ -203,7 +203,7 @@ export default function Workspace({ projectId }: WorkspaceProps) {
             )}
           </Panel>
           <Separator className={isNarrow ? "h-1 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20" : "w-1 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20"} />
-          <Panel id="diagram" panelRef={diagramPanelRef} defaultSize={41} minSize={15} collapsible collapsedSize={0}>
+          <Panel id="diagram" panelRef={diagramPanelRef} defaultSize="41" minSize="15" collapsible collapsedSize="0">
             {currentContent && selectedDocId ? (
               <DiagramPane
                 key={selectedDocId}
