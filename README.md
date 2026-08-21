@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# diagram-md
 
-## Getting Started
+A browser-based tool for writing documentation and drawing diagrams side by side, saved directly to your local filesystem — no server, no database.
 
-First, run the development server:
+## What it does
+
+- Each **project** is a folder on your computer, containing a `manifest.json` plus one `.md` file and one `.excalidraw` file per document.
+- Each **document** pairs a Markdown file (edited with [MDX Editor](https://mdxeditor.dev)) with a diagram (drawn with [Excalidraw](https://excalidraw.com)), shown side by side in a resizable, collapsible split view.
+- Everything is saved locally via the browser's File System Access API — you pick the folder, the app writes the files there.
+
+## How it works
+
+- Storage is behind a small provider interface (`lib/storage/`), currently backed by one implementation: your local filesystem. This keeps the door open for other backends (e.g. IndexedDB, a remote drive) later without changing the rest of the app.
+- Project/document metadata lives in `manifest.json`; the actual content lives in plain `.md` and `.excalidraw` files next to it, so a project folder is readable and portable on its own.
+- Saving is explicit — click **Save** to write the current document and diagram to disk.
+
+## Requirements
+
+- Chrome or Edge (the File System Access API isn't supported in Firefox or Safari yet).
+
+## Running it
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Next.js (App Router) + TypeScript + Tailwind CSS, with `@mdxeditor/editor`, `@excalidraw/excalidraw`, and `react-resizable-panels` for the split-pane layout.
