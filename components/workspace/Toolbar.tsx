@@ -58,8 +58,8 @@ export default function Toolbar({
             }`}
           >
             <span
-              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform dark:bg-black ${
-                autosaveEnabled ? "translate-x-[18px]" : "translate-x-0.5"
+              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all dark:bg-black ${
+                autosaveEnabled ? "left-[18px]" : "left-0.5"
               }`}
             />
           </button>
