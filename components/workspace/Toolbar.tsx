@@ -69,10 +69,10 @@ export default function Toolbar({
           type="button"
           onClick={onSave}
           disabled={!dirty || saving}
-          title={autosaveEnabled ? undefined : "Ctrl+S"}
+          title="Ctrl+S"
           className="rounded-md bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-black"
         >
-          {saving ? "Saving…" : autosaveEnabled ? "Save" : "Save (Ctrl+S)"}
+          {saving ? "Saving…" : "Save (Ctrl+S)"}
         </button>
       </div>
     </div>

@@ -137,12 +137,12 @@ export default function Workspace({ projectId }: WorkspaceProps) {
     function handleKeyDown(event: KeyboardEvent) {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
         event.preventDefault();
-        if (!autosaveEnabled) handleSave();
+        handleSave();
       }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [autosaveEnabled, handleSave]);
+  }, [handleSave]);
 
   async function handleCreateDocument() {
     if (!storage || !manifest) return;
