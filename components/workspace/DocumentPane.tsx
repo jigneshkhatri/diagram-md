@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { highlightActiveLine, highlightActiveLineGutter, lineNumbers } from "@codemirror/view";
 import {
   MDXEditor,
   headingsPlugin,
@@ -51,6 +52,8 @@ const CODE_BLOCK_LANGUAGES = {
   md: "Markdown",
 };
 
+const CODE_MIRROR_EXTENSIONS = [lineNumbers(), highlightActiveLine(), highlightActiveLineGutter()];
+
 export interface DocumentPaneHandle {
   getMarkdown(): string;
 }
@@ -89,8 +92,8 @@ export default function DocumentPane({ initialMarkdown, onReady, onChange }: Doc
           tablePlugin(),
           frontmatterPlugin(),
           codeBlockPlugin({ defaultCodeBlockLanguage: "txt" }),
-          codeMirrorPlugin({ codeBlockLanguages: CODE_BLOCK_LANGUAGES }),
-          diffSourcePlugin({ viewMode: "rich-text" }),
+          codeMirrorPlugin({ codeBlockLanguages: CODE_BLOCK_LANGUAGES, codeMirrorExtensions: CODE_MIRROR_EXTENSIONS }),
+          diffSourcePlugin({ viewMode: "rich-text", codeMirrorExtensions: CODE_MIRROR_EXTENSIONS }),
           markdownShortcutPlugin(),
           toolbarPlugin({
             toolbarContents: () => (
