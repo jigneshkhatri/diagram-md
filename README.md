@@ -30,3 +30,7 @@ Then open [http://localhost:3000](http://localhost:3000).
 ## Tech stack
 
 Next.js (App Router) + TypeScript + Tailwind CSS, with `@mdxeditor/editor`, `@excalidraw/excalidraw`, and `react-resizable-panels` for the split-pane layout.
+
+## License
+
+[MIT](./LICENSE.md)
