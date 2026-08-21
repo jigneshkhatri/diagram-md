@@ -1,5 +1,6 @@
 import type { DocumentMeta, ProjectManifest } from "@/lib/types";
 import type { DocumentContent, ProjectStorage } from "@/lib/storage/types";
+import { slugify, uniqueSlug } from "@/lib/filename";
 
 export const EMPTY_DIAGRAM = JSON.stringify({
   type: "excalidraw",
@@ -10,18 +11,22 @@ export const EMPTY_DIAGRAM = JSON.stringify({
   files: {},
 });
 
+function slugOf(doc: DocumentMeta): string {
+  return doc.mdFileName.replace(/\.md$/, "");
+}
+
 export async function createDocument(
   storage: ProjectStorage,
   manifest: ProjectManifest,
   title: string,
 ): Promise<ProjectManifest> {
   const now = new Date().toISOString();
-  const id = crypto.randomUUID();
+  const slug = uniqueSlug(slugify(title), new Set(manifest.documents.map(slugOf)));
   const doc: DocumentMeta = {
-    id,
+    id: crypto.randomUUID(),
     title,
-    mdFileName: `${id}.md`,
-    diagramFileName: `${id}.excalidraw`,
+    mdFileName: `${slug}.md`,
+    diagramFileName: `${slug}.excalidraw`,
     createdAt: now,
     updatedAt: now,
   };
@@ -37,11 +42,28 @@ export async function renameDocument(
   documentId: string,
   title: string,
 ): Promise<ProjectManifest> {
+  const doc = manifest.documents.find((d) => d.id === documentId);
+  if (!doc) return manifest;
+
   const now = new Date().toISOString();
+  const existingSlugs = new Set(manifest.documents.filter((d) => d.id !== documentId).map(slugOf));
+  const newSlug = uniqueSlug(slugify(title), existingSlugs);
+
+  let updatedDoc: DocumentMeta = { ...doc, title, updatedAt: now };
+
+  if (newSlug !== slugOf(doc)) {
+    // Files are named after the title, so a rename that changes the slug
+    // means moving the content to new files and dropping the old ones.
+    const content = await storage.readDocument(doc);
+    updatedDoc = { ...updatedDoc, mdFileName: `${newSlug}.md`, diagramFileName: `${newSlug}.excalidraw` };
+    await storage.writeDocument(updatedDoc, content);
+    await storage.deleteDocument(doc);
+  }
+
   const updated: ProjectManifest = {
     ...manifest,
     updatedAt: now,
-    documents: manifest.documents.map((doc) => (doc.id === documentId ? { ...doc, title, updatedAt: now } : doc)),
+    documents: manifest.documents.map((d) => (d.id === documentId ? updatedDoc : d)),
   };
   await storage.writeManifest(updated);
   return updated;

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Group, Panel, Separator, type PanelImperativeHandle } from "react-resizable-panels";
 import DocumentSidebar from "@/components/workspace/DocumentSidebar";
+import DocumentNameDialog from "@/components/workspace/DocumentNameDialog";
 import Toolbar from "@/components/workspace/Toolbar";
 import type { DocumentPaneHandle } from "@/components/workspace/DocumentPane";
 import type { DiagramPaneHandle } from "@/components/workspace/DiagramPane";
@@ -148,21 +149,42 @@ export default function Workspace({ projectId }: WorkspaceProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleSave]);
 
-  async function handleCreateDocument() {
-    if (!storage || !manifest) return;
-    const title = window.prompt("Document title", "Untitled")?.trim();
-    if (!title) return;
-    const updated = await createDocument(storage, manifest, title);
-    setManifest(updated);
-    setSelectedDocId(updated.documents[updated.documents.length - 1].id);
+  const [nameDialog, setNameDialog] = useState<
+    { mode: "create" } | { mode: "rename"; docId: string; currentTitle: string } | null
+  >(null);
+  const [nameDialogBusy, setNameDialogBusy] = useState(false);
+  const [nameDialogError, setNameDialogError] = useState<string | null>(null);
+
+  function handleCreateDocument() {
+    setNameDialogError(null);
+    setNameDialog({ mode: "create" });
   }
 
-  async function handleRenameDocument(id: string) {
-    if (!storage || !manifest) return;
-    const current = manifest.documents.find((d) => d.id === id);
-    const title = window.prompt("Rename document", current?.title)?.trim();
-    if (!title) return;
-    setManifest(await renameDocument(storage, manifest, id, title));
+  function handleRenameDocument(id: string) {
+    const current = manifest?.documents.find((d) => d.id === id);
+    if (!current) return;
+    setNameDialogError(null);
+    setNameDialog({ mode: "rename", docId: id, currentTitle: current.title });
+  }
+
+  async function handleConfirmName(title: string) {
+    if (!storage || !manifest || !nameDialog) return;
+    setNameDialogBusy(true);
+    setNameDialogError(null);
+    try {
+      if (nameDialog.mode === "create") {
+        const updated = await createDocument(storage, manifest, title);
+        setManifest(updated);
+        setSelectedDocId(updated.documents[updated.documents.length - 1].id);
+      } else {
+        setManifest(await renameDocument(storage, manifest, nameDialog.docId, title));
+      }
+      setNameDialog(null);
+    } catch (err) {
+      setNameDialogError(err instanceof Error ? err.message : "Failed to save document.");
+    } finally {
+      setNameDialogBusy(false);
+    }
   }
 
   async function handleDeleteDocument(id: string) {
@@ -287,6 +309,18 @@ export default function Workspace({ projectId }: WorkspaceProps) {
           </Panel>
         </Group>
       </div>
+
+      {nameDialog && (
+        <DocumentNameDialog
+          heading={nameDialog.mode === "create" ? "New document" : "Rename document"}
+          initialValue={nameDialog.mode === "rename" ? nameDialog.currentTitle : ""}
+          confirmLabel={nameDialog.mode === "create" ? "Create" : "Rename"}
+          submitting={nameDialogBusy}
+          submitError={nameDialogError}
+          onCancel={() => setNameDialog(null)}
+          onConfirm={handleConfirmName}
+        />
+      )}
     </div>
   );
 }
