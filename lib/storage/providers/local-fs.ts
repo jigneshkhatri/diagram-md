@@ -26,8 +26,11 @@ async function writeTextFile(dir: FileSystemDirectoryHandle, name: string, conte
 
 class LocalFsProjectStorage implements ProjectStorage {
   readonly providerId = "local-fs";
+  readonly locationLabel: string;
 
-  constructor(private readonly dir: FileSystemDirectoryHandle) {}
+  constructor(private readonly dir: FileSystemDirectoryHandle) {
+    this.locationLabel = dir.name;
+  }
 
   async readManifest(): Promise<ProjectManifest> {
     await ensurePermission(this.dir);

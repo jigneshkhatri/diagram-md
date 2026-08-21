@@ -207,6 +207,7 @@ export default function Workspace({ projectId }: WorkspaceProps) {
     <div className="flex h-screen flex-col">
       <Toolbar
         projectName={manifest.name}
+        locationLabel={storage?.locationLabel ?? null}
         dirty={dirty}
         saving={saving}
         onSave={handleSave}

@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Switch from "@/components/ui/Switch";
-import { DocumentIcon, ShapesIcon, SidebarIcon } from "@/components/ui/icons";
+import { DocumentIcon, FolderIcon, ShapesIcon, SidebarIcon } from "@/components/ui/icons";
 
 interface ToolbarProps {
   projectName: string;
+  locationLabel: string | null;
   dirty: boolean;
   saving: boolean;
   onSave: () => void;
@@ -20,6 +21,7 @@ interface ToolbarProps {
 
 export default function Toolbar({
   projectName,
+  locationLabel,
   dirty,
   saving,
   onSave,
@@ -39,6 +41,15 @@ export default function Toolbar({
           ← Projects
         </Link>
         <span className="truncate font-semibold">{projectName}</span>
+        {locationLabel && (
+          <span
+            className="hidden shrink-0 items-center gap-1 text-xs text-black/40 sm:flex dark:text-white/40"
+            title={`Folder name: ${locationLabel} (browsers don't expose the full filesystem path to web pages)`}
+          >
+            <FolderIcon className="h-3.5 w-3.5" />
+            <span className="max-w-40 truncate">{locationLabel}</span>
+          </span>
+        )}
         {dirty && (
           <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
             Unsaved

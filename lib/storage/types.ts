@@ -8,6 +8,12 @@ export interface DocumentContent {
 
 export interface ProjectStorage {
   readonly providerId: string;
+  /**
+   * Human-readable label for where this project lives (e.g. a folder name),
+   * or null if the provider has nothing meaningful to show. Never a full
+   * filesystem path — browsers don't expose that to web pages.
+   */
+  readonly locationLabel: string | null;
   readManifest(): Promise<ProjectManifest>;
   writeManifest(manifest: ProjectManifest): Promise<void>;
   readDocument(doc: DocumentMeta): Promise<DocumentContent>;
