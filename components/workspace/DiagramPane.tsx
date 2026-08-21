@@ -35,7 +35,10 @@ export default function DiagramPane({ initialSceneJSON, onReady, onChange }: Dia
     <div className="h-full w-full">
       <Excalidraw
         excalidrawAPI={(api: ExcalidrawImperativeAPI) => {
-          lastSignatureRef.current = elementsSignature(api.getSceneElements());
+          // Must match what onChange's `elements` param contains (including
+          // soft-deleted elements) or a freshly opened scene with any
+          // deleted elements would immediately look dirty.
+          lastSignatureRef.current = elementsSignature(api.getSceneElementsIncludingDeleted());
           onReady?.({
             serialize: () => serializeAsJSON(api.getSceneElements(), api.getAppState(), api.getFiles(), "local"),
           });
