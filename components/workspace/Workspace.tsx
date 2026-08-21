@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Group, Panel, Separator, type PanelImperativeHandle } from "react-resizable-panels";
 import DocumentSidebar from "@/components/workspace/DocumentSidebar";
@@ -22,6 +22,8 @@ import type { DocumentContent, ProjectStorage } from "@/lib/storage/types";
 const DocumentPane = dynamic(() => import("@/components/workspace/DocumentPane"), { ssr: false });
 const DiagramPane = dynamic(() => import("@/components/workspace/DiagramPane"), { ssr: false });
 
+const AUTOSAVE_DELAY_MS = 1500;
+
 interface WorkspaceProps {
   projectId: string;
 }
@@ -40,6 +42,7 @@ export default function Workspace({ projectId }: WorkspaceProps) {
   const currentContent = docContent?.docId === selectedDocId ? docContent.content : null;
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [autosaveEnabled, setAutosaveEnabled] = useState(false);
 
   const [isNarrow, setIsNarrow] = useState(false);
   useEffect(() => {
@@ -108,7 +111,7 @@ export default function Workspace({ projectId }: WorkspaceProps) {
     setSelectedDocId(id);
   }
 
-  async function handleSave() {
+  const handleSave = useCallback(async () => {
     if (!storage || !manifest || !selectedDocId) return;
     const content: DocumentContent = {
       markdown: documentHandleRef.current?.getMarkdown() ?? "",
@@ -122,7 +125,24 @@ export default function Workspace({ projectId }: WorkspaceProps) {
     } finally {
       setSaving(false);
     }
-  }
+  }, [storage, manifest, selectedDocId]);
+
+  useEffect(() => {
+    if (!autosaveEnabled || !dirty) return;
+    const timer = setTimeout(handleSave, AUTOSAVE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [autosaveEnabled, dirty, handleSave]);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        if (!autosaveEnabled) handleSave();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [autosaveEnabled, handleSave]);
 
   async function handleCreateDocument() {
     if (!storage || !manifest) return;
@@ -164,6 +184,8 @@ export default function Workspace({ projectId }: WorkspaceProps) {
         dirty={dirty}
         saving={saving}
         onSave={handleSave}
+        autosaveEnabled={autosaveEnabled}
+        onToggleAutosave={setAutosaveEnabled}
         onToggleDocumentPane={() => {
           const p = docPanelRef.current;
           if (p?.isCollapsed()) p.expand();

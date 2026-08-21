@@ -5,6 +5,8 @@ interface ToolbarProps {
   dirty: boolean;
   saving: boolean;
   onSave: () => void;
+  autosaveEnabled: boolean;
+  onToggleAutosave: (enabled: boolean) => void;
   onToggleDocumentPane: () => void;
   onToggleDiagramPane: () => void;
 }
@@ -14,6 +16,8 @@ export default function Toolbar({
   dirty,
   saving,
   onSave,
+  autosaveEnabled,
+  onToggleAutosave,
   onToggleDocumentPane,
   onToggleDiagramPane,
 }: ToolbarProps) {
@@ -26,7 +30,7 @@ export default function Toolbar({
         <span className="font-medium">{projectName}</span>
         {dirty && <span className="text-xs text-amber-600 dark:text-amber-400">Unsaved changes</span>}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onToggleDocumentPane}
@@ -41,13 +45,34 @@ export default function Toolbar({
         >
           Toggle diagram
         </button>
+
+        <label className="flex items-center gap-2 text-xs text-black/70 dark:text-white/70">
+          Autosave
+          <button
+            type="button"
+            role="switch"
+            aria-checked={autosaveEnabled}
+            onClick={() => onToggleAutosave(!autosaveEnabled)}
+            className={`relative h-5 w-9 rounded-full transition-colors ${
+              autosaveEnabled ? "bg-black dark:bg-white" : "bg-black/20 dark:bg-white/20"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform dark:bg-black ${
+                autosaveEnabled ? "translate-x-[18px]" : "translate-x-0.5"
+              }`}
+            />
+          </button>
+        </label>
+
         <button
           type="button"
           onClick={onSave}
           disabled={!dirty || saving}
+          title={autosaveEnabled ? undefined : "Ctrl+S"}
           className="rounded-md bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-black"
         >
-          {saving ? "Saving…" : "Save"}
+          {saving ? "Saving…" : autosaveEnabled ? "Save" : "Save (Ctrl+S)"}
         </button>
       </div>
     </div>
