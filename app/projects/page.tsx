@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import ProjectCard from "@/components/projects/ProjectCard";
 import NewProjectDialog from "@/components/projects/NewProjectDialog";
 import UnsupportedBrowserNotice from "@/components/projects/UnsupportedBrowserNotice";
+import Button from "@/components/ui/Button";
 import { availableProviders } from "@/lib/storage";
 import { addProject, listProjects } from "@/lib/storage/registry";
 import type { ProjectRegistryEntry } from "@/lib/types";
@@ -68,27 +69,22 @@ export default function ProjectsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Projects</h1>
+    <main className="mx-auto max-w-4xl px-6 py-10 sm:py-14">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            diagram<span className="text-accent">·</span>md
+          </h1>
+          <p className="mt-1 text-sm text-black/50 dark:text-white/50">Your local documentation &amp; diagram projects.</p>
+        </div>
         {providers.length > 0 && (
-          <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => handleOpenExisting(providers[0])}
-              className="rounded-md border border-black/15 px-3 py-1.5 text-sm hover:bg-black/5 disabled:opacity-50 dark:border-white/15 dark:hover:bg-white/10"
-            >
+          <div className="flex shrink-0 gap-2">
+            <Button variant="secondary" disabled={busy} onClick={() => handleOpenExisting(providers[0])}>
               Open existing
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => setShowNewProject(true)}
-              className="rounded-md bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-black"
-            >
+            </Button>
+            <Button variant="primary" disabled={busy} onClick={() => setShowNewProject(true)}>
               New project
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -106,12 +102,13 @@ export default function ProjectsPage() {
       )}
 
       {loaded && entries.length === 0 && providers.length > 0 && (
-        <p className="mt-8 text-sm text-black/50 dark:text-white/50">
-          No projects yet. Create a new one or open an existing project folder.
-        </p>
+        <div className="mt-10 flex flex-col items-center gap-1 rounded-xl border border-dashed border-black/15 py-16 text-center dark:border-white/15">
+          <p className="text-sm font-medium">No projects yet</p>
+          <p className="text-sm text-black/50 dark:text-white/50">Create a new one or open an existing project folder.</p>
+        </div>
       )}
 
-      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {entries.map((entry) => (
           <ProjectCard
             key={entry.id}

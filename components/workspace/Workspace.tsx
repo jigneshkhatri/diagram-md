@@ -43,6 +43,9 @@ export default function Workspace({ projectId }: WorkspaceProps) {
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [autosaveEnabled, setAutosaveEnabled] = useState(false);
+  const [documentPaneVisible, setDocumentPaneVisible] = useState(true);
+  const [diagramPaneVisible, setDiagramPaneVisible] = useState(true);
+  const [sidebarNarrow, setSidebarNarrow] = useState(false);
 
   const [isNarrow, setIsNarrow] = useState(false);
   useEffect(() => {
@@ -55,6 +58,7 @@ export default function Workspace({ projectId }: WorkspaceProps) {
 
   const documentHandleRef = useRef<DocumentPaneHandle | null>(null);
   const diagramHandleRef = useRef<DiagramPaneHandle | null>(null);
+  const sidebarPanelRef = useRef<PanelImperativeHandle | null>(null);
   const docPanelRef = useRef<PanelImperativeHandle | null>(null);
   const diagramPanelRef = useRef<PanelImperativeHandle | null>(null);
 
@@ -186,6 +190,14 @@ export default function Workspace({ projectId }: WorkspaceProps) {
         onSave={handleSave}
         autosaveEnabled={autosaveEnabled}
         onToggleAutosave={setAutosaveEnabled}
+        sidebarNarrow={sidebarNarrow}
+        onToggleSidebar={() => {
+          const p = sidebarPanelRef.current;
+          if (p?.isCollapsed()) p.expand();
+          else p?.collapse();
+        }}
+        documentPaneVisible={documentPaneVisible}
+        diagramPaneVisible={diagramPaneVisible}
         onToggleDocumentPane={() => {
           const p = docPanelRef.current;
           if (p?.isCollapsed()) p.expand();
@@ -199,47 +211,79 @@ export default function Workspace({ projectId }: WorkspaceProps) {
       />
       <div className="min-h-0 flex-1">
         <Group orientation={isNarrow ? "vertical" : "horizontal"}>
-          <Panel id="sidebar" defaultSize="18" minSize="12" maxSize="30" collapsible collapsedSize="0">
+          <Panel
+            id="sidebar"
+            panelRef={sidebarPanelRef}
+            defaultSize="18"
+            minSize="12"
+            maxSize="30"
+            collapsible
+            collapsedSize="60px"
+            onResize={(size) => setSidebarNarrow(size.inPixels < 100)}
+          >
             <DocumentSidebar
               documents={manifest.documents}
               selectedId={selectedDocId}
+              narrow={sidebarNarrow}
               onSelect={handleSelectDocument}
               onCreate={handleCreateDocument}
               onRename={handleRenameDocument}
               onDelete={handleDeleteDocument}
             />
           </Panel>
-          <Separator className={isNarrow ? "h-1 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20" : "w-1 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20"} />
-          <Panel id="document" panelRef={docPanelRef} defaultSize="41" minSize="15" collapsible collapsedSize="0">
-            {currentContent && selectedDocId ? (
-              <DocumentPane
-                key={selectedDocId}
-                initialMarkdown={currentContent.markdown}
-                onReady={(handle) => {
-                  documentHandleRef.current = handle;
-                }}
-                onChange={() => setDirty(true)}
-              />
-            ) : (
-              <p className="p-6 text-sm text-black/40 dark:text-white/40">Select or create a document.</p>
-            )}
-          </Panel>
-          <Separator className={isNarrow ? "h-1 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20" : "w-1 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20"} />
-          <Panel id="diagram" panelRef={diagramPanelRef} defaultSize="41" minSize="15" collapsible collapsedSize="0">
-            {currentContent && selectedDocId ? (
-              <DiagramPane
-                key={selectedDocId}
-                initialSceneJSON={currentContent.diagram}
-                onReady={(handle) => {
-                  diagramHandleRef.current = handle;
-                }}
-                onChange={() => setDirty(true)}
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-sm text-black/40 dark:text-white/40">
-                Select or create a document.
-              </div>
-            )}
+          <Separator className={isNarrow ? "h-1 bg-black/10 transition-colors hover:bg-accent/40 dark:bg-white/10" : "w-1 bg-black/10 transition-colors hover:bg-accent/40 dark:bg-white/10"} />
+          {/* Document + diagram live in their own nested group so toggling one
+              only ever exchanges space with the other — not with the sidebar. */}
+          <Panel id="content-area" defaultSize="82" minSize="40">
+            <Group orientation={isNarrow ? "vertical" : "horizontal"} className="h-full">
+              <Panel
+                id="document"
+                panelRef={docPanelRef}
+                defaultSize="50"
+                minSize="20"
+                collapsible
+                collapsedSize="0"
+                onResize={(size) => setDocumentPaneVisible(size.asPercentage > 0)}
+              >
+                {currentContent && selectedDocId ? (
+                  <DocumentPane
+                    key={selectedDocId}
+                    initialMarkdown={currentContent.markdown}
+                    onReady={(handle) => {
+                      documentHandleRef.current = handle;
+                    }}
+                    onChange={() => setDirty(true)}
+                  />
+                ) : (
+                  <p className="p-6 text-sm text-black/40 dark:text-white/40">Select or create a document.</p>
+                )}
+              </Panel>
+              <Separator className={isNarrow ? "h-1 bg-black/10 transition-colors hover:bg-accent/40 dark:bg-white/10" : "w-1 bg-black/10 transition-colors hover:bg-accent/40 dark:bg-white/10"} />
+              <Panel
+                id="diagram"
+                panelRef={diagramPanelRef}
+                defaultSize="50"
+                minSize="20"
+                collapsible
+                collapsedSize="0"
+                onResize={(size) => setDiagramPaneVisible(size.asPercentage > 0)}
+              >
+                {currentContent && selectedDocId ? (
+                  <DiagramPane
+                    key={selectedDocId}
+                    initialSceneJSON={currentContent.diagram}
+                    onReady={(handle) => {
+                      diagramHandleRef.current = handle;
+                    }}
+                    onChange={() => setDirty(true)}
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-sm text-black/40 dark:text-white/40">
+                    Select or create a document.
+                  </div>
+                )}
+              </Panel>
+            </Group>
           </Panel>
         </Group>
       </div>

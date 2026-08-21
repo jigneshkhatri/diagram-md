@@ -1,4 +1,7 @@
 import Link from "next/link";
+import Button from "@/components/ui/Button";
+import Switch from "@/components/ui/Switch";
+import { DocumentIcon, ShapesIcon, SidebarIcon } from "@/components/ui/icons";
 
 interface ToolbarProps {
   projectName: string;
@@ -7,6 +10,10 @@ interface ToolbarProps {
   onSave: () => void;
   autosaveEnabled: boolean;
   onToggleAutosave: (enabled: boolean) => void;
+  sidebarNarrow: boolean;
+  onToggleSidebar: () => void;
+  documentPaneVisible: boolean;
+  diagramPaneVisible: boolean;
   onToggleDocumentPane: () => void;
   onToggleDiagramPane: () => void;
 }
@@ -18,62 +25,68 @@ export default function Toolbar({
   onSave,
   autosaveEnabled,
   onToggleAutosave,
+  sidebarNarrow,
+  onToggleSidebar,
+  documentPaneVisible,
+  diagramPaneVisible,
   onToggleDocumentPane,
   onToggleDiagramPane,
 }: ToolbarProps) {
   return (
-    <div className="flex items-center justify-between border-b border-black/10 px-4 py-2 dark:border-white/10">
-      <div className="flex items-center gap-3">
-        <Link href="/projects" className="text-sm text-black/50 hover:underline dark:text-white/50">
+    <div className="flex items-center justify-between gap-4 border-b border-black/10 bg-white/80 px-4 py-2.5 backdrop-blur-sm dark:border-white/10 dark:bg-black/50">
+      <div className="flex min-w-0 items-center gap-3">
+        <Link href="/projects" className="shrink-0 text-sm text-black/50 transition hover:text-accent dark:text-white/50">
           ← Projects
         </Link>
-        <span className="font-medium">{projectName}</span>
-        {dirty && <span className="text-xs text-amber-600 dark:text-amber-400">Unsaved changes</span>}
+        <span className="truncate font-semibold">{projectName}</span>
+        {dirty && (
+          <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+            Unsaved
+          </span>
+        )}
       </div>
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
+      <div className="flex shrink-0 items-center gap-2">
+        <Button
+          variant="ghost"
+          iconOnly
+          onClick={onToggleSidebar}
+          title="Toggle sidebar"
+          aria-label="Toggle sidebar"
+          aria-pressed={!sidebarNarrow}
+          className={!sidebarNarrow ? "bg-accent/10 text-accent" : ""}
+        >
+          <SidebarIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          iconOnly
           onClick={onToggleDocumentPane}
-          className="rounded-md border border-black/15 px-2 py-1 text-xs hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
+          title="Toggle document pane"
+          aria-label="Toggle document pane"
+          aria-pressed={documentPaneVisible}
+          className={documentPaneVisible ? "bg-accent/10 text-accent" : ""}
         >
-          Toggle doc
-        </button>
-        <button
-          type="button"
+          <DocumentIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          iconOnly
           onClick={onToggleDiagramPane}
-          className="rounded-md border border-black/15 px-2 py-1 text-xs hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
+          title="Toggle diagram pane"
+          aria-label="Toggle diagram pane"
+          aria-pressed={diagramPaneVisible}
+          className={diagramPaneVisible ? "bg-accent/10 text-accent" : ""}
         >
-          Toggle diagram
-        </button>
+          <ShapesIcon className="h-4 w-4" />
+        </Button>
 
-        <label className="flex items-center gap-2 text-xs text-black/70 dark:text-white/70">
-          Autosave
-          <button
-            type="button"
-            role="switch"
-            aria-checked={autosaveEnabled}
-            onClick={() => onToggleAutosave(!autosaveEnabled)}
-            className={`relative h-5 w-9 rounded-full transition-colors ${
-              autosaveEnabled ? "bg-black dark:bg-white" : "bg-black/20 dark:bg-white/20"
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all dark:bg-black ${
-                autosaveEnabled ? "left-[18px]" : "left-0.5"
-              }`}
-            />
-          </button>
-        </label>
+        <div className="mx-1 h-5 w-px bg-black/10 dark:bg-white/10" aria-hidden="true" />
 
-        <button
-          type="button"
-          onClick={onSave}
-          disabled={!dirty || saving}
-          title="Ctrl+S"
-          className="rounded-md bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-black"
-        >
+        <Switch checked={autosaveEnabled} onChange={onToggleAutosave} label="Autosave" />
+
+        <Button variant="primary" onClick={onSave} disabled={!dirty || saving} title="Ctrl+S">
           {saving ? "Saving…" : "Save (Ctrl+S)"}
-        </button>
+        </Button>
       </div>
     </div>
   );
